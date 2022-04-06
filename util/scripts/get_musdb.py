@@ -1,4 +1,3 @@
-import argparse
 import os
 import glob
 import numpy as np
@@ -54,7 +53,7 @@ def separate_into_three(dataset):
 	
 	return {"train" : train_list, "val" : val_list, "test" : test_list}
 
-def get_folds(root_path, version="HQ"):
+def get_musdb_folds(root_path, version="HQ"):
 	"""
 	Choose which version of get_musdb function to be called, and separate into train, validation, and test lists
 	:param root_path: the root directory of MUSDB dataset
@@ -68,6 +67,3 @@ def get_folds(root_path, version="HQ"):
 	
 	return separate_into_three(dataset)
 
-if __name__ == "__main__":
-	#Do some argument parsing and call get_folds function
-	pass
