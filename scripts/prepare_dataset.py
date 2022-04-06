@@ -1,8 +1,7 @@
 import argparse
 import os
 
-import util
-
+from ..museparation.util import load_dataset
 
 
 def main():

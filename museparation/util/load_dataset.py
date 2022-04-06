@@ -34,12 +34,12 @@ def load_set_yx(path, instruments):
 	samples = dict()
 
 	for track in instruments:
-		samples[track] = glob.glob(os.pash.join(path, track, "*"))
+		samples[track] = sorted(glob.glob(os.pash.join(path, track, "*")))
 	
 	return samples
 	
 	
-def yx_to_xy(yx_set, shuffle = False):
+def yx_to_xy(yx_set, shuffle = True):
 	"""
 	converts the return of load_set_yx to be the same configuration as the return of load_set_xy (minimum length will be used)
 	:param yx_set: Return value of load_set_yx
