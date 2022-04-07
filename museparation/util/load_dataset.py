@@ -14,7 +14,7 @@ def load_set_xy(path, instruments):
 	tracks = glob.glob(os.path.join(path, "*"))
 	samples = list()
 
-	for track_folder in sorted(songs):
+	for track_folder in sorted(tracks):
 		track = dict()
 		for stem in instruments:
 			audio_path = os.path.join(track_folder, stem, ".wav")

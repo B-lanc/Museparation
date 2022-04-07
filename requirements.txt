@@ -1,2 +1,3 @@
 h5py==3.6.0
+Museparation==0.0.1a1
 numpy==1.22.3
