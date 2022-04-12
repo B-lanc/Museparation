@@ -17,7 +17,7 @@ def load_set_xy(path, instruments):
 	for track_folder in sorted(tracks):
 		track = dict()
 		for stem in instruments:
-			audio_path = os.path.join(track_folder, stem, ".wav")
+			audio_path = os.path.join(track_folder, stem + ".wav")
 			track[stem] = audio_path
 		samples.append(track)
 	
