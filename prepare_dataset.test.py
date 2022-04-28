@@ -17,8 +17,8 @@ def main(args):
 		create_hdf(args.hdf_dir, "train", musdb["train"], source=None)
 	else:
 		create_hdf(args.hdf_dir, "train", musdb["train"], source="mixture")
-	create_hdf(args.hdf_dir, "val", musdb["train"], source="mixture")
-	create_hdf(args.hdf_dir, "test", musdb["train"], source="mixture")
+	create_hdf(args.hdf_dir, "val", musdb["val"], source="mixture")
+	create_hdf(args.hdf_dir, "test", musdb["test"], source="mixture")
 
 
 

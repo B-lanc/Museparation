@@ -1,7 +1,7 @@
 import numpy as np
 import librosa
 
-def load_audio(audio_path, sr, mono):
+def load_audio(audio_path, sr=44100, mono=False):
 	"""
 	"""
 	data, sanity_sr = librosa.load(audio_path, sr=sr, mono=mono)
