@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 from sortedcontainers import SortedList
 from tqdm import tqdm
 
-from ../utils/load_audio import load_audio
+from ..utils.load_audio import load_audio
 
 class WaveunetShuffleDataset(Dataset):
 	"""
