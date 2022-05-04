@@ -14,12 +14,12 @@ from tqdm import tqdm
 
 import museparation.waveunet.model.utils as model_utils
 import museparation.waveunet.utils as utils
-from museparation.waveunet.data.dataset import SeparationDataset
-from museparation.waveunet.data.utils import crop_targets, random_amplify
 from museparation.waveunet.test import evaluate, validate
 from museparation.waveunet.model.waveunet import Waveunet
-#from museparation.scripts.get_musdb import get_musdbhq
-from museparation.waveunet.data.musdb import get_musdb_folds
+#from museparation.waveunet.data.musdb import get_musdb_folds
+from museparation.scripts.get_musdb import get_musdbhq
+from museparation.waveunet2.dataloader import WaveunetShuffleDataset
+from museparation.util.random_amplify import random_amplify
 
 
 
@@ -44,14 +44,13 @@ def main(args):
 	
 	writer = SummaryWriter(args.log_dir)
 
-#	musdb = get_musdbhq(args.musdb_path)
-	musdb = get_musdb_folds(args.musdb_path)
+	#musdb = get_musdb_folds(args.musdb_path)
+	musdb = get_musdbhq(args.musdb_path)
 
-	crop_func = partial(crop_targets, shapes=model.shapes)
-	augment_func = partial(random_amplify, shapes=model.shapes, min=0.7, max=1.0)
-	train_data = SeparationDataset(musdb, "train", args.instruments, args.sr, args.channels, model.shapes, True, args.hdf_dir, audio_transform=augment_func)
-	val_data = SeparationDataset(musdb, "val", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=crop_func)
-	test_data = SeparationDataset(musdb, "test", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=crop_func)
+	augment_func = partial(random_amplify, min=0.7, max=1.0)
+	train_data = WaveunetShuffleDataset(musdb, "train", args.instruments, args.sr, args.channels, model.shapes, True, args.hdf_dir, audio_transform=augment_func)
+	val_data = WaveunetShuffleDataset(musdb, "val", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=None)
+	test_data = WaveunetShuffleDataset(musdb, "test", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=None)
 
 	print('test')
 
