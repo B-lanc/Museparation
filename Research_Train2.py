@@ -16,9 +16,10 @@ import museparation.waveunet.model.utils as model_utils
 import museparation.waveunet.utils as utils
 from museparation.waveunet.test import evaluate, validate
 from museparation.waveunet.model.waveunet import Waveunet
-#from museparation.waveunet.data.musdb import get_musdb_folds
-from museparation.scripts.get_musdb import get_musdbhq
+from museparation.waveunet.data.musdb import get_musdb_folds
+#from museparation.scripts.get_musdb import get_musdbhq
 from museparation.waveunet2.dataloader import WaveunetShuffleDataset
+from museparation.waveunet.data.utils import crop_targets
 from museparation.util.random_amplify import random_amplify
 
 
@@ -44,15 +45,16 @@ def main(args):
 	
 	writer = SummaryWriter(args.log_dir)
 
-	#musdb = get_musdb_folds(args.musdb_path)
-	musdb = get_musdbhq(args.musdb_path)
+	musdb = get_musdb_folds(args.musdb_path)
+	#musdb = get_musdbhq(args.musdb_path)
 
     writer = SummaryWriter(args.log_dir)
 
+	crop_func = partial(crop_targets, shapes=model.shapes)
 	augment_func = partial(random_amplify, min=0.7, max=1.0)
-	train_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "train", args.instruments, args.sr, args.channels, model.shapes, True, audio_transform=augment_func)
-	val_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "val", args.instruments, args.sr, args.channels, model.shapes, False, audio_transform=None)
-	test_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "test", args.instruments, args.sr, args.channels, model.shapes, False, audio_transform=None)
+	train_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "train_shuffle", args.instruments, args.sr, args.channels, model.shapes, True, audio_transform=augment_func)
+	val_data = SeparationDataset(musdb, "val", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=crop_func)
+	test_data = SeparationDataset(musdb, "test", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=crop_func)
 
 
 	dataloader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, worker_init_fn=utils.worker_init_fn)
