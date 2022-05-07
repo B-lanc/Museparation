@@ -79,6 +79,7 @@ def main(args):
 
 	print('TRAINING START')
 	while state["worse_epochs"] < args.patience:
+		print(state["epochs"]
 		print("Training one epoch from iteration " + str(state["step"]))
 		avg_time = 0.
 		model.train()
