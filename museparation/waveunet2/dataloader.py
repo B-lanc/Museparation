@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 from sortedcontainers import SortedList
 from tqdm import tqdm
 
-from ..utils.load_audio import load_audio
+from ..util.load_audio import load_audio
 
 class WaveunetShuffleDataset(Dataset):
 	"""
@@ -14,10 +14,10 @@ class WaveunetShuffleDataset(Dataset):
 	"""
 
 	def __init__(self, dataset, hdf_dir, filename, instruments, sr, channels, shapes, random_hops, audio_transform=None, in_memory=False):
-	"""
-	:param dataset: (list of dictionaries)
-	"""
-		super(SeparationDataset, self).__init__()
+		"""
+		:param dataset: (list of dictionaries)
+		"""
+		super(WaveunetShuffleDataset, self).__init__()
 
 		self.hdf_dataset = None
 		self.hdf_dir = hdf_dir
@@ -51,18 +51,19 @@ class WaveunetShuffleDataset(Dataset):
 
 		with h5py.File(self.hdf_file, "r") as f:
 			if f.attrs["sr"] != sr or \
-				f.attrs["channels" != channels or\
+				f.attrs["channels"] != channels or\
 				list(f.attrs["instruments"]) != instruments:
-				raise ValuesError("SR or channel or instruments not the same as the already existing hdf file")
+				raise ValueError(
+					"SR or channel or instruments not the same as the already existing hdf file")
 
-		with h5py.File(self.hdf_file, "r") as f
+		with h5py.File(self.hdf_file, "r") as f:
 			lengths = [f[str(song_idx)].attrs["target_length"] for song_idx in range(len(f))]
 			lengths = [(l // self.shapes["output_frames"]) + 1 for l in lengths]
 
 		self.start_pos = SortedList(np.cumsum(lengths))
 		self.length = self.start_pos[-1]
 
-		self.inst_shuffle = {key : [np.arange(self.length)] for key in self.instruments}
+		self.inst_shuffle = {key : np.arange(self.length) for key in self.instruments}
 		self.shuffle()
 
 
@@ -78,11 +79,11 @@ class WaveunetShuffleDataset(Dataset):
 		if self.audio_transform is not None:
 			targets = self.audio_transform(targets)
 
-		mixture = np.sum(list(targets.values()))
+		mixture = np.sum(list(targets.values()), axis = 0)
 		mixture = np.clip(mixture, -1, 1)
 
 		for key in targets:
-			targets[key] = targets[key][[:, shapes["output_start_frame"]:shapes["output_end_frame"]]
+			targets[key] = targets[key][:, self.shapes["output_start_frame"]:self.shapes["output_end_frame"]]
 		return mixture, targets
 
 
@@ -105,9 +106,9 @@ class WaveunetShuffleDataset(Dataset):
 			pad_front = 0
 		
 		end_pos = start_target_pos - self.shapes["output_start_frame"] + self.shapes["input_frames"]
-		if end_pos > audio_length:
-			pad_back = end - audio_length
-			end_pos = audio_length
+		if end_pos > target_length:
+			pad_back = end_pos - target_length
+			end_pos = target_length
 		else:
 			pad_back = 0
 
@@ -120,3 +121,6 @@ class WaveunetShuffleDataset(Dataset):
 	def shuffle(self):
 			for key in self.inst_shuffle:
 				np.random.shuffle(self.inst_shuffle[key])
+
+	def __len__(self):
+		return self.length

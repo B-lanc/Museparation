@@ -47,12 +47,12 @@ def main(args):
 	#musdb = get_musdb_folds(args.musdb_path)
 	musdb = get_musdbhq(args.musdb_path)
 
-	augment_func = partial(random_amplify, min=0.7, max=1.0)
-	train_data = WaveunetShuffleDataset(musdb, "train", args.instruments, args.sr, args.channels, model.shapes, True, args.hdf_dir, audio_transform=augment_func)
-	val_data = WaveunetShuffleDataset(musdb, "val", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=None)
-	test_data = WaveunetShuffleDataset(musdb, "test", args.instruments, args.sr, args.channels, model.shapes, False, args.hdf_dir, audio_transform=None)
+    writer = SummaryWriter(args.log_dir)
 
-	print('test')
+	augment_func = partial(random_amplify, min=0.7, max=1.0)
+	train_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "train", args.instruments, args.sr, args.channels, model.shapes, True, audio_transform=augment_func)
+	val_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "val", args.instruments, args.sr, args.channels, model.shapes, False, audio_transform=None)
+	test_data = WaveunetShuffleDataset(musdb, args.hdf_dir, "test", args.instruments, args.sr, args.channels, model.shapes, False, audio_transform=None)
 
 
 	dataloader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, worker_init_fn=utils.worker_init_fn)
@@ -78,6 +78,11 @@ def main(args):
 
 	print('TRAINING START')
 	while state["worse_epochs"] < args.patience:
+		if state["epochs"] % args.shuffle_freq == 0 and state["epochs"] != 0:
+		    print("reshuffling dataset")
+			train_data.shuffle()
+			dataloader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, worker_init_fn=utils.worker_init_fn)
+
 		print("Training one epoch from iteration " + str(state["step"]))
 		avg_time = 0.
 		model.train()
@@ -191,6 +196,7 @@ if __name__ == "__main__":
 	parser.add_argument('--patience', type=int, default=10)
 	parser.add_argument('--loss', type=str, default="L1")
 	parser.add_argument('--example_freq', type=str, default="200")
+	parser.add_argument('--shuffle_freq', type=str, default="10")
 
 #model hyperparams
 	parser.add_argument('--features', type=int, default=32)

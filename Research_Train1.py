@@ -175,9 +175,9 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--musdb_path", type=str, required=True)
 	parser.add_argument("--hdf_dir", type=str, default="hdf")
-	parser.add_argument('--checkpoint_dir', type=str, default='checkpoints/waveunet')
+	parser.add_argument('--checkpoint_dir', type=str, default='checkpoints')
 	parser.add_argument('--load_model', type=str, default=None)
-	parser.add_argument('--log_dir', type=str, default='logs/waveunet')
+	parser.add_argument('--log_dir', type=str, default='logs')
 	parser.add_argument("--cuda", action='store_true')
 	parser.add_argument('--instruments', type=str, nargs='+', default=["bass", "drums", "other", "vocals"])
 	parser.add_argument('--separate', type=int, default=1)
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
 
 #training hyperparams
-	parser.add_argument('--batch_size', type=int, default=4)
+	parser.add_argument('--batch_size', type=int, default=8)
 	parser.add_argument('--lr', type=float, default=1e-3)
 	parser.add_argument('--min_lr', type=float, default=5e-5)
 	parser.add_argument('--cycles', type=int, default=2)
