@@ -25,7 +25,7 @@ from museparation.util.random_amplify import random_amplify
 
 
 def main(args):
-	num_features = [args.features*i for i in range(1, args.levels+1)] if args.feature_growth == "add" else [args.features*2**1 for i in range(args.levels)]
+	num_features = [args.features*i for i in range(1, args.levels+1)] if args.feature_growth == "add" else [args.features*2**i for i in range(args.levels)]
 
 	target_outputs = int(args.output_size * args.sr)
 	model = Waveunet(args.channels, num_features, args.channels, args.instruments, 
@@ -80,7 +80,7 @@ def main(args):
 
 	print('TRAINING START')
 	while state["worse_epochs"] < args.patience:
-		print(state["epochs"]
+		print(state["epochs"])
 		if (state["epochs"]-1) % args.shuffle_freq == 0 and state["epochs"] != 0:
 		    print("reshuffling dataset")
 			print("===================")
@@ -199,7 +199,7 @@ if __name__ == "__main__":
 	parser.add_argument('--cycles', type=int, default=2)
 	parser.add_argument('--patience', type=int, default=10)
 	parser.add_argument('--loss', type=str, default="L1")
-	parser.add_argument('--example_freq', type=str, default="200")
+	parser.add_argument('--example_freq', type=int, default=200)
 	parser.add_argument('--shuffle_freq', type=str, default="10")
 
 #model hyperparams
