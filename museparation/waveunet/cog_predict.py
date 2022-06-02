@@ -94,7 +94,7 @@ class waveunetPredictor(cog.Predictor):
         num_features = (
             [args.features * i for i in range(1, args.levels + 1)]
             if args.feature_growth == "add"
-            else [args.features * 2 ** i for i in range(0, args.levels)]
+            else [args.features * 2**i for i in range(0, args.levels)]
         )
         target_outputs = int(args.output_size * args.sr)
         self.model = Waveunet(

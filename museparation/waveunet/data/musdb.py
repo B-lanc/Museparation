@@ -7,11 +7,11 @@ from ..data.utils import load, write_wav
 
 
 def get_musdbhq(database_path):
-    '''
+    """
     Retrieve audio file paths for MUSDB HQ dataset
     :param database_path: MUSDB HQ root directory
     :return: dictionary with train and test keys, each containing list of samples, each sample containing all audio paths
-    '''
+    """
     subsets = list()
 
     for subset in ["train", "test"]:
@@ -48,12 +48,13 @@ def get_musdbhq(database_path):
 
     return subsets
 
+
 def get_musdb(database_path):
-    '''
+    """
     Retrieve audio file paths for MUSDB dataset
     :param database_path: MUSDB root directory
     :return: dictionary with train and test keys, each containing list of samples, each sample containing all audio paths
-    '''
+    """
     mus = musdb.DB(root=database_path, is_wav=False)
 
     subsets = list()
@@ -69,11 +70,18 @@ def get_musdb(database_path):
             mix_path = track_path + "_mix.wav"
             acc_path = track_path + "_accompaniment.wav"
             if os.path.exists(mix_path):
-                print("WARNING: Skipping track " + mix_path + " since it exists already")
+                print(
+                    "WARNING: Skipping track " + mix_path + " since it exists already"
+                )
 
                 # Add paths and then skip
-                paths = {"mix" : mix_path, "accompaniment" : acc_path}
-                paths.update({key : track_path + "_" + key + ".wav" for key in ["bass", "drums", "other", "vocals"]})
+                paths = {"mix": mix_path, "accompaniment": acc_path}
+                paths.update(
+                    {
+                        key: track_path + "_" + key + ".wav"
+                        for key in ["bass", "drums", "other", "vocals"]
+                    }
+                )
 
                 samples.append(paths)
 
@@ -92,7 +100,17 @@ def get_musdb(database_path):
                 paths[stem] = path
 
             # Add other instruments to form accompaniment
-            acc_audio = np.clip(sum([stem_audio[key] for key in list(stem_audio.keys()) if key != "vocals"]), -1.0, 1.0)
+            acc_audio = np.clip(
+                sum(
+                    [
+                        stem_audio[key]
+                        for key in list(stem_audio.keys())
+                        if key != "vocals"
+                    ]
+                ),
+                -1.0,
+                1.0,
+            )
             write_wav(acc_path, acc_audio, rate)
             paths["accompaniment"] = acc_path
 
@@ -102,8 +120,14 @@ def get_musdb(database_path):
             paths["mix"] = mix_path
 
             diff_signal = np.abs(mix_audio - acc_audio - stem_audio["vocals"])
-            print("Maximum absolute deviation from source additivity constraint: " + str(np.max(diff_signal)))# Check if acc+vocals=mix
-            print("Mean absolute deviation from source additivity constraint:    " + str(np.mean(diff_signal)))
+            print(
+                "Maximum absolute deviation from source additivity constraint: "
+                + str(np.max(diff_signal))
+            )  # Check if acc+vocals=mix
+            print(
+                "Mean absolute deviation from source additivity constraint:    "
+                + str(np.mean(diff_signal))
+            )
 
             samples.append(paths)
 
@@ -111,6 +135,7 @@ def get_musdb(database_path):
 
     print("DONE preparing dataset!")
     return subsets
+
 
 def get_musdb_folds(root_path, version="HQ"):
     if version == "HQ":
@@ -120,8 +145,8 @@ def get_musdb_folds(root_path, version="HQ"):
     train_val_list = dataset[0]
     test_list = dataset[1]
 
-    np.random.seed(1337) # Ensure that partitioning is always the same on each run
+    np.random.seed(1337)  # Ensure that partitioning is always the same on each run
     train_list = np.random.choice(train_val_list, 75, replace=False)
     val_list = [elem for elem in train_val_list if elem not in train_list]
     # print("First training song: " + str(train_list[0])) # To debug whether partitioning is deterministic
-    return {"train" : train_list, "val" : val_list, "test" : test_list}
+    return {"train": train_list, "val": val_list, "test": test_list}
