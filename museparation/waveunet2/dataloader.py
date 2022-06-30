@@ -112,7 +112,8 @@ class WaveunetShuffleDataset(Dataset):
 
     def getStem(self, stem, index):
         audio_idx = self.start_pos.bisect_right(index)
-        index = index - self.start_pos[audio_idx - 1]
+        if audio_idx > 0:
+            index = index - self.start_pos[audio_idx - 1]
 
         target_length = self.hdf_dataset[str(audio_idx)].attrs["target_length"]
         if self.random_hops:
